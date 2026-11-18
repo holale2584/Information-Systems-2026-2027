@@ -1,0 +1,121 @@
+Conceptual model
+HeadOffice 1 ── N Project
+Project 1 ── N ProjectAction
+Project N ── N City, with an investment for each project and city
+ProjectAction N ── N City, limited to cities in that action's project
+
+Logical model
+HeadOffice(office_id PK, city, country, address, phone, director_name)
+Project(project_code PK, office_id FK, title, start_date, end_date, budget,
+        manager_name)
+City(city_id PK, name, country, population)
+ProjectAction((project_code, action_number) PK, project_code FK, description)
+ProjectCity((project_code, city_id) PK, project_code FK, city_id FK, investment)
+ActionCity((project_code, action_number, city_id) PK,
+           (project_code, action_number) FK, (project_code, city_id) FK)
+
+Physical model
+create database lab_ngo;
+use lab_ngo;
+
+-- Design a database for an NGO's head offices, projects, actions and cities.
+-- Store the investment of each project in each city and describe each action.
+create table head_office (
+    office_id int unsigned auto_increment primary key,
+    city varchar(120) not null,
+    country varchar(120) not null,
+    address varchar(255) not null,
+    phone varchar(32) not null,
+    director_name varchar(255) not null
+);
+
+create table project (
+    project_code varchar(32) primary key,
+    office_id int unsigned not null,
+    title varchar(255) not null,
+    start_date date not null,
+    end_date date not null,
+    budget decimal(15, 2) not null,
+    manager_name varchar(255) not null,
+    foreign key (office_id) references head_office (office_id),
+    check (end_date >= start_date),
+    check (budget >= 0)
+);
+
+create table city (
+    city_id int unsigned auto_increment primary key,
+    name varchar(120) not null,
+    country varchar(120) not null,
+    population int unsigned not null
+);
+
+create table project_action (
+    project_code varchar(32) not null,
+    action_number int unsigned not null,
+    description varchar(500) not null,
+    primary key (project_code, action_number),
+    foreign key (project_code) references project (project_code),
+    check (action_number > 0)
+);
+
+create table project_city (
+    project_code varchar(32) not null,
+    city_id int unsigned not null,
+    investment decimal(15, 2) not null,
+    primary key (project_code, city_id),
+    foreign key (project_code) references project (project_code),
+    foreign key (city_id) references city (city_id),
+    check (investment >= 0)
+);
+
+create table action_city (
+    project_code varchar(32) not null,
+    action_number int unsigned not null,
+    city_id int unsigned not null,
+    primary key (project_code, action_number, city_id),
+    foreign key (project_code, action_number)
+        references project_action (project_code, action_number),
+    foreign key (project_code, city_id)
+        references project_city (project_code, city_id)
+);
+
+describe head_office;
+describe project;
+describe city;
+describe project_action;
+describe project_city;
+describe action_city;
+
+DESCRIBE output
+Field	Type	Null	Key	Default	Extra
+office_id	int unsigned	NO	PRI	NULL	auto_increment
+city	varchar(120)	NO		NULL	
+country	varchar(120)	NO		NULL	
+address	varchar(255)	NO		NULL	
+phone	varchar(32)	NO		NULL	
+director_name	varchar(255)	NO		NULL	
+Field	Type	Null	Key	Default	Extra
+project_code	varchar(32)	NO	PRI	NULL	
+office_id	int unsigned	NO	MUL	NULL	
+title	varchar(255)	NO		NULL	
+start_date	date	NO		NULL	
+end_date	date	NO		NULL	
+budget	decimal(15,2)	NO		NULL	
+manager_name	varchar(255)	NO		NULL	
+Field	Type	Null	Key	Default	Extra
+city_id	int unsigned	NO	PRI	NULL	auto_increment
+name	varchar(120)	NO		NULL	
+country	varchar(120)	NO		NULL	
+population	int unsigned	NO		NULL	
+Field	Type	Null	Key	Default	Extra
+project_code	varchar(32)	NO	PRI	NULL	
+action_number	int unsigned	NO	PRI	NULL	
+description	varchar(500)	NO		NULL	
+Field	Type	Null	Key	Default	Extra
+project_code	varchar(32)	NO	PRI	NULL	
+city_id	int unsigned	NO	PRI	NULL	
+investment	decimal(15,2)	NO		NULL	
+Field	Type	Null	Key	Default	Extra
+project_code	varchar(32)	NO	PRI	NULL	
+action_number	int unsigned	NO	PRI	NULL	
+city_id	int unsigned	NO	PRI	NULL	
