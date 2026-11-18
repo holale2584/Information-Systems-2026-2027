@@ -1,0 +1,49 @@
+-- q1: All info of all employees.
+employees
+
+-- q2: All info of all departments.
+departments
+
+-- q3: Full names of all employees.
+π_{first_name, last_name}(employees)
+
+-- q4: Names of all departments.
+π_{dept_name}(departments)
+
+-- q5: Full names of employees working in “ICT” department.
+π_{first_name, last_name}(
+    employees ⋈ dept_emp ⋈ σ_{dept_name = 'ICT'}(departments)
+)
+
+-- q6: Full names of male employees working in “BIO” department.
+π_{first_name, last_name}(
+    σ_{gender = 'M'}(employees) ⋈ dept_emp ⋈ σ_{dept_name = 'BIO'}(departments)
+)
+
+-- q7: Salaries of female employees working in “WEO” department.
+π_{s.salary}(
+    (σ_{gender = 'F'}(employees) ⋈ dept_emp ⋈ σ_{dept_name = 'WEO'}(departments))
+    ⋈_{emp_no = s.emp_no ∧ from_date < s.to_date ∧ to_date > s.from_date}
+    ρ_s(salaries)
+)
+
+-- q8: Full names of employees who have the same last name as their manager.
+A ← ρ_e(employees) ⋈_{e.emp_no = de.emp_no} ρ_de(dept_emp)
+B ← ρ_m(employees) ⋈_{m.emp_no = dm.emp_no} ρ_dm(dept_manager)
+π_{e.first_name, e.last_name}(
+    A ⋈_{de.dept_no = dm.dept_no ∧ de.from_date < dm.to_date ∧
+        de.to_date > dm.from_date ∧ e.emp_no ≠ m.emp_no ∧
+        e.last_name = m.last_name} B
+)
+
+-- q9: Full names of employees who was paid more than $100000.
+π_{first_name, last_name}(
+    employees ⋈ π_{emp_no}(σ_{salary > 100000}(salaries))
+)
+
+-- q10: Names of all departments that have employees paid more than $1000000.
+π_{dept_name}(
+    (departments ⋈ dept_emp)
+    ⋈_{emp_no = s.emp_no ∧ from_date < s.to_date ∧ to_date > s.from_date}
+    ρ_s(σ_{salary > 1000000}(salaries))
+)
